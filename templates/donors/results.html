@@ -1,0 +1,25 @@
+{% extends 'donors/base.html' %}
+{% block title %}Matching Donors{% endblock %}
+{% block content %}
+<h2 class="mb-4">Matching Donors for {{ request_obj.blood_group_needed }}</h2>
+{% if matches %}
+    <div class="row">
+        {% for donor in matches %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ donor.name }}</h5>
+                    <p class="card-text">
+                        Blood Group: <span class="badge bg-danger">{{ donor.blood_group }}</span><br>
+                        Location: {{ donor.location }}<br>
+                        <span class="badge bg-success">Available</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-warning">No matching donors found nearby.</div>
+{% endif %}
+{% endblock %}
