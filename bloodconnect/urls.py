@@ -1,17 +1,10 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from donors import views as donor_views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('donors/', include('donors.urls')),
-]
-from django.contrib import admin
-from django.urls import path, include
-from donors import views as donor_views          # ADD this line
-from django.contrib.auth import views as auth_views   # keep if you already had this
-
-urlpatterns = [
-    path('', donor_views.home, name='home'),      # ADD this line
+    path('', donor_views.home, name='home'),
     path('admin/', admin.site.urls),
     path('donors/', include('donors.urls')),
     path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
