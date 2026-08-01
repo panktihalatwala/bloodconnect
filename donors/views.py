@@ -1,7 +1,11 @@
 from django.shortcuts import render, redirect
 from .forms import DonorForm, BloodRequestForm
 from .utils import find_matching_donors
+from django.contrib.auth.decorators import login_required
+from accounts.decorators import role_required
+from .models import Donor
 
+@login_required
 def register_donor(request):
     if request.method == 'POST':
         form = DonorForm(request.POST)
@@ -12,9 +16,11 @@ def register_donor(request):
         form = DonorForm()
     return render(request, 'donors/register.html', {'form': form})
 
+@login_required
 def register_success(request):
     return render(request, 'donors/success.html')
 
+@login_required
 def submit_request(request):
     if request.method == 'POST':
         form = BloodRequestForm(request.POST)
@@ -25,3 +31,17 @@ def submit_request(request):
     else:
         form = BloodRequestForm()
     return render(request, 'donors/submit_request.html', {'form': form})
+def home(request):
+    return render(request, 'donors/home.html')
+
+@role_required('admin')
+def verify_donors_list(request):
+    unverified = Donor.objects.filter(is_verified=False)
+    return render(request, 'donors/verify_donors.html', {'donors': unverified})
+
+@role_required('admin')
+def verify_donor(request, donor_id):
+    donor = Donor.objects.get(id=donor_id)
+    donor.is_verified = True
+    donor.save()
+    return redirect('verify_donors_list')

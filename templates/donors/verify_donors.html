@@ -1,0 +1,28 @@
+{% extends 'donors/base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Pending Donor Verifications</h2>
+    {% if donors %}
+    <table class="table">
+        <thead>
+            <tr><th>Name</th><th>Blood Group</th><th>Phone</th><th>Location</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+            {% for donor in donors %}
+            <tr>
+                <td>{{ donor.name }}</td>
+                <td>{{ donor.blood_group }}</td>
+                <td>{{ donor.phone_number }}</td>
+                <td>{{ donor.location }}</td>
+                <td>
+                    <a href="{% url 'verify_donor' donor.id %}" class="btn btn-sm btn-success">Verify</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pending donors to verify.</p>
+    {% endif %}
+</div>
+{% endblock %}
