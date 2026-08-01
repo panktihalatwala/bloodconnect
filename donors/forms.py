@@ -4,9 +4,10 @@ from .models import Donor, BloodRequest
 class DonorForm(forms.ModelForm):
     class Meta:
         model = Donor
-        fields = ['name', 'blood_group', 'phone_number', 'location', 'availability_status', 'last_donation_date']
+        fields = ['name', 'email', 'blood_group', 'phone_number', 'location', 'availability_status', 'last_donation_date']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'blood_group': forms.Select(attrs={'class': 'form-select'}),
             'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
             'location': forms.TextInput(attrs={'class': 'form-control'}),
