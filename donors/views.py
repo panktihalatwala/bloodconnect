@@ -25,3 +25,5 @@ def submit_request(request):
     else:
         form = BloodRequestForm()
     return render(request, 'donors/submit_request.html', {'form': form})
+def home(request):
+    return render(request, 'donors/home.html')
