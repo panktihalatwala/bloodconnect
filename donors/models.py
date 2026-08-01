@@ -9,6 +9,7 @@ class Donor(models.Model):
     ]
 
     name = models.CharField(max_length=100)
+    email = models.EmailField(max_length=254)
     blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES)
     phone_number = models.CharField(max_length=15)
     location = models.CharField(max_length=100)

@@ -39,9 +39,18 @@ def verify_donors_list(request):
     unverified = Donor.objects.filter(is_verified=False)
     return render(request, 'donors/verify_donors.html', {'donors': unverified})
 
+from django.core.mail import send_mail
+
 @role_required('admin')
 def verify_donor(request, donor_id):
     donor = Donor.objects.get(id=donor_id)
     donor.is_verified = True
     donor.save()
+    send_mail(
+        subject='You are now a verified donor — BloodConnect',
+        message=f'Hi {donor.name}, your donor profile has been verified by our admin team. You may now be contacted for emergency blood requests.',
+        from_email='bloodconnect@example.com',
+        recipient_list=[donor.email],
+        fail_silently=False,
+    )
     return redirect('verify_donors_list')

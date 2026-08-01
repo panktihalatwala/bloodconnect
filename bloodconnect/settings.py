@@ -127,3 +127,6 @@ STATIC_URL = 'static/'
 LOGIN_REDIRECT_URL = '/donors/register/'
 LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_URL = 'login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'bloodconnect@example.com'
