@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Donor(models.Model):
     BLOOD_GROUP_CHOICES = [
@@ -8,6 +9,7 @@ class Donor(models.Model):
         ('O+', 'O+'), ('O-', 'O-'),
     ]
 
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='donor_profile')
     name = models.CharField(max_length=100)
     email = models.EmailField(max_length=254)
     blood_group = models.CharField(max_length=3, choices=BLOOD_GROUP_CHOICES)
@@ -30,6 +32,7 @@ class BloodRequest(models.Model):
     ]
 
     requester_name = models.CharField(max_length=100)
+    requester_email = models.EmailField(max_length=254, default='')
     blood_group_needed = models.CharField(max_length=3, choices=Donor.BLOOD_GROUP_CHOICES)
     urgency = models.CharField(max_length=10, choices=URGENCY_CHOICES)
     hospital_location = models.CharField(max_length=100)
@@ -48,3 +51,30 @@ class DonationHistory(models.Model):
 
     def __str__(self):
         return f"{self.donor.name} - {self.donation_date}"
+
+
+class OTPVerification(models.Model):
+    blood_request = models.ForeignKey(BloodRequest, on_delete=models.CASCADE)
+    otp_code = models.CharField(max_length=6)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class MatchLog(models.Model):
+    RESPONSE_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Accepted', 'Accepted'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    donor = models.ForeignKey(Donor, on_delete=models.CASCADE, related_name='match_logs')
+    blood_request = models.ForeignKey(BloodRequest, on_delete=models.CASCADE, related_name='match_logs')
+    status = models.CharField(max_length=10, choices=RESPONSE_CHOICES, default='Pending')
+    matched_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('donor', 'blood_request')
+
+    def __str__(self):
+        return f"{self.donor.name} -> {self.blood_request} [{self.status}]"

@@ -1,0 +1,17 @@
+{% extends 'donors/base.html' %}
+{% block title %}Verify OTP{% endblock %}
+{% block content %}
+<h2 class="mb-4">Enter OTP</h2>
+<p>We sent a 6-digit code to {{ request_obj.requester_email }}</p>
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+<form method="POST" class="col-md-4">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">OTP Code</label>
+        <input type="text" name="otp_code" class="form-control" maxlength="6" required>
+    </div>
+    <button type="submit" class="btn btn-danger">Verify</button>
+</form>
+{% endblock %}

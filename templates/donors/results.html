@@ -8,12 +8,21 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{{ donor.name }}</h5>
+                    <h5 class="card-title">Donor Match</h5>
                     <p class="card-text">
                         Blood Group: <span class="badge bg-danger">{{ donor.blood_group }}</span><br>
-                        Location: {{ donor.location }}<br>
+                        General Area: {{ donor.location }}<br>
                         <span class="badge bg-success">Available</span>
                     </p>
+                    {% if verified %}
+                    <p class="card-text">
+                        Name: {{ donor.name }}<br>
+                        Phone: {{ donor.phone_number }}<br>
+                        Email: {{ donor.email }}
+                    </p>
+                    {% else %}
+                    <a href="{% url 'send_otp' request_obj.id %}" class="btn btn-sm btn-outline-danger">Verify to see contact details</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
