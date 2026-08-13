@@ -1,0 +1,46 @@
+{% extends 'donors/base.html' %}
+{% block title %}My Matches{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Donor Dashboard</h2>
+
+<h4>Pending Matches</h4>
+{% if pending_matches %}
+    <div class="row">
+        {% for match in pending_matches %}
+        <div class="col-md-4 mb-3">
+            <div class="card border-danger">
+                <div class="card-body">
+                    <h5 class="card-title">{{ match.blood_request.blood_group_needed }} needed</h5>
+                    <p class="card-text">
+                        Urgency: <span class="badge bg-warning text-dark">{{ match.blood_request.urgency }}</span><br>
+                        Hospital: {{ match.blood_request.hospital_location }}<br>
+                        Requested: {{ match.matched_at|date:"d M Y, H:i" }}
+                    </p>
+                    <form method="POST" action="{% url 'respond_to_match' match.id %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" name="response" value="Accepted" class="btn btn-sm btn-success">Accept</button>
+                        <button type="submit" name="response" value="Rejected" class="btn btn-sm btn-outline-danger">Reject</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No pending matches right now.</p>
+{% endif %}
+
+<h4 class="mt-4">Past Responses</h4>
+{% if past_matches %}
+    <ul class="list-group">
+        {% for match in past_matches %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ match.blood_request.blood_group_needed }} — {{ match.blood_request.hospital_location }}
+            <span class="badge {% if match.status == 'Accepted' %}bg-success{% else %}bg-secondary{% endif %}">{{ match.status }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-muted">No past responses yet.</p>
+{% endif %}
+{% endblock %}

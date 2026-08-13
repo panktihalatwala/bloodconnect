@@ -18,9 +18,10 @@ class DonorForm(forms.ModelForm):
 class BloodRequestForm(forms.ModelForm):
     class Meta:
         model = BloodRequest
-        fields = ['requester_name', 'blood_group_needed', 'urgency', 'hospital_location']
+        fields = ['requester_name', 'requester_email', 'blood_group_needed', 'urgency', 'hospital_location']
         widgets = {
             'requester_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'requester_email': forms.EmailInput(attrs={'class': 'form-control'}),
             'blood_group_needed': forms.Select(attrs={'class': 'form-select'}),
             'urgency': forms.Select(attrs={'class': 'form-select'}),
             'hospital_location': forms.TextInput(attrs={'class': 'form-control'}),

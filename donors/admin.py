@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Donor, BloodRequest, DonationHistory
+from .models import Donor, BloodRequest, DonationHistory, OTPVerification, MatchLog
 
 @admin.register(Donor)
 class DonorAdmin(admin.ModelAdmin):
@@ -12,3 +12,11 @@ class BloodRequestAdmin(admin.ModelAdmin):
 @admin.register(DonationHistory)
 class DonationHistoryAdmin(admin.ModelAdmin):
     list_display = ['donor', 'donation_date', 'is_confirmed']
+
+@admin.register(OTPVerification)
+class OTPVerificationAdmin(admin.ModelAdmin):
+    list_display = ['blood_request', 'otp_code', 'is_verified', 'created_at']
+
+@admin.register(MatchLog)
+class MatchLogAdmin(admin.ModelAdmin):
+    list_display = ['donor', 'blood_request', 'status', 'matched_at', 'responded_at']

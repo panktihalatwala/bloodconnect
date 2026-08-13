@@ -34,3 +34,11 @@ def find_matching_donors(blood_group_needed, location=None):
     if location:
         eligible_donors = [d for d in eligible_donors if location.lower() in d.location.lower()]
     return eligible_donors
+
+
+def find_matching_donors_with_fallback(blood_group_needed, location=None):
+    donors = find_matching_donors(blood_group_needed, location)
+    if not donors and location:
+        # Nothing found nearby — fall back to searching without location restriction
+        donors = find_matching_donors(blood_group_needed, location=None)
+    return donors
