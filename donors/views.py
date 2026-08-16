@@ -4,10 +4,11 @@ from .forms import DonorForm, BloodRequestForm
 from .utils import find_matching_donors_with_fallback
 from django.contrib.auth.decorators import login_required
 from accounts.decorators import role_required
-from .models import Donor, BloodRequest, OTPVerification, MatchLog
+from .models import Donor, BloodRequest, OTPVerification, MatchLog, DonationHistory
 from .email_utils import send_email_with_retry
 from django.utils import timezone
 import random
+
 
 @login_required
 def register_donor(request):
@@ -191,10 +192,12 @@ def donor_dashboard(request):
     donor = get_object_or_404(Donor, user=request.user)
     pending_matches = MatchLog.objects.filter(donor=donor, status='Pending').select_related('blood_request')
     past_matches = MatchLog.objects.filter(donor=donor).exclude(status='Pending').select_related('blood_request')
+    donation_history = DonationHistory.objects.filter(donor=donor).order_by('-donation_date')
     return render(request, 'donors/donor_dashboard.html', {
         'donor': donor,
         'pending_matches': pending_matches,
         'past_matches': past_matches,
+        'donation_history': donation_history,
     })
 
 @role_required('donor')
@@ -207,4 +210,18 @@ def respond_to_match(request, match_id):
             match.status = response
             match.responded_at = timezone.now()
             match.save()
+    return redirect('donor_dashboard')
+
+@role_required('requester')
+def requester_dashboard(request):
+    my_requests = BloodRequest.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'donors/requester_dashboard.html', {
+        'my_requests': my_requests,
+    })
+
+@role_required('donor')
+def toggle_availability(request):
+    donor = get_object_or_404(Donor, user=request.user)
+    donor.availability_status = not donor.availability_status
+    donor.save()
     return redirect('donor_dashboard')

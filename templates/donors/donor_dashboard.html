@@ -1,7 +1,37 @@
 {% extends 'donors/base.html' %}
-{% block title %}My Matches{% endblock %}
+{% block title %}My Donor Dashboard{% endblock %}
 {% block content %}
 <h2 class="mb-4">My Donor Dashboard</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Profile Status</h5>
+        <p class="card-text">
+            Verification:
+            {% if donor.is_verified %}
+                <span class="badge bg-success">Verified</span>
+            {% else %}
+                <span class="badge bg-warning text-dark">Pending Verification</span>
+            {% endif %}
+        </p>
+        <p class="card-text">
+            Availability:
+            {% if donor.availability_status %}
+                <span class="badge bg-success">Available</span>
+            {% else %}
+                <span class="badge bg-secondary">Unavailable</span>
+            {% endif %}
+        </p>
+        <form method="POST" action="{% url 'toggle_availability' %}">
+            {% csrf_token %}
+            {% if donor.availability_status %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as Unavailable</button>
+            {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-success">Mark as Available</button>
+            {% endif %}
+        </form>
+    </div>
+</div>
 
 <h4>Pending Matches</h4>
 {% if pending_matches %}
@@ -42,5 +72,33 @@
     </ul>
 {% else %}
     <p class="text-muted">No past responses yet.</p>
+{% endif %}
+
+<h4 class="mt-4">Donation History</h4>
+{% if donation_history %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Confirmed</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for donation in donation_history %}
+            <tr>
+                <td>{{ donation.donation_date|date:"d M Y" }}</td>
+                <td>
+                    {% if donation.is_confirmed %}
+                        <span class="badge bg-success">Confirmed</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Unconfirmed</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="text-muted">No donation history recorded yet.</p>
 {% endif %}
 {% endblock %}
