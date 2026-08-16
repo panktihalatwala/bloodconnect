@@ -31,6 +31,7 @@ class BloodRequest(models.Model):
         ('Pending', 'Pending'), ('Fulfilled', 'Fulfilled'), ('Expired', 'Expired'),
     ]
 
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, related_name='blood_requests')
     requester_name = models.CharField(max_length=100)
     requester_email = models.EmailField(max_length=254, default='')
     blood_group_needed = models.CharField(max_length=3, choices=Donor.BLOOD_GROUP_CHOICES)

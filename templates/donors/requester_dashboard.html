@@ -1,0 +1,40 @@
+{% extends 'donors/base.html' %}
+{% block title %}My Requests{% endblock %}
+{% block content %}
+<h2 class="mb-4">My Blood Requests</h2>
+
+{% if my_requests %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Blood Group</th>
+                <th>Hospital</th>
+                <th>Urgency</th>
+                <th>Status</th>
+                <th>Submitted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for req in my_requests %}
+            <tr>
+                <td><span class="badge bg-danger">{{ req.blood_group_needed }}</span></td>
+                <td>{{ req.hospital_location }}</td>
+                <td>{{ req.urgency }}</td>
+                <td>
+                    {% if req.status == 'Fulfilled' %}
+                        <span class="badge bg-success">Fulfilled</span>
+                    {% elif req.status == 'Expired' %}
+                        <span class="badge bg-secondary">Expired</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ req.created_at|date:"d M Y, H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p class="text-muted">You haven't submitted any blood requests yet.</p>
+{% endif %}
+{% endblock %}
