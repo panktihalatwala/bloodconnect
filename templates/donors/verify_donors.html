@@ -1,7 +1,18 @@
 {% extends 'donors/base.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h2>Pending Donor Verifications</h2>
+    <h2>Pending Donor Verifications
+        <span class="badge bg-danger">{{ pending_count }}</span>
+    </h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     {% if donors %}
     <table class="table">
         <thead>
