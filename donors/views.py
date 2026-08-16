@@ -30,10 +30,44 @@ def submit_request(request):
     if request.method == 'POST':
         form = BloodRequestForm(request.POST)
         if form.is_valid():
-            blood_request = form.save()
+            blood_request = form.save(commit=False)
+            blood_request.user = request.user
+            blood_request.save()
             matches = find_matching_donors_with_fallback(blood_request.blood_group_needed, blood_request.hospital_location)
             for donor in matches:
-                MatchLog.objects.get_or_create(donor=donor, blood_request=blood_request)
+                _, created = MatchLog.objects.get_or_create(donor=donor, blood_request=blood_request)
+                if created:
+                    plain_message = (
+                        f"Dear {donor.name},\n\n"
+                        f"You have been matched to a blood request for {blood_request.blood_group_needed} "
+                        f"at {blood_request.hospital_location} (Urgency: {blood_request.urgency}).\n\n"
+                        "Please log in to your BloodConnect donor dashboard to accept or decline this match.\n\n"
+                        "Warm regards,\n"
+                        "The BloodConnect Team"
+                    )
+                    html_message = f"""
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #333;">
+                        <h2 style="color: #b30000;">BloodConnect</h2>
+                        <p>Dear {donor.name},</p>
+                        <p>You have been matched to a blood request:</p>
+                        <ul>
+                            <li><strong>Blood Group:</strong> {blood_request.blood_group_needed}</li>
+                            <li><strong>Hospital:</strong> {blood_request.hospital_location}</li>
+                            <li><strong>Urgency:</strong> {blood_request.urgency}</li>
+                        </ul>
+                        <p>Please log in to your BloodConnect donor dashboard to accept or decline this match.</p>
+                        <p style="margin-top: 30px;">Warm regards,<br>
+                        <strong>The BloodConnect Team</strong></p>
+                        <hr style="border: none; border-top: 1px solid #ddd; margin-top: 20px;">
+                        <p style="font-size: 12px; color: #888;">This is an automated message from BloodConnect. Please do not reply directly to this email.</p>
+                    </div>
+                    """
+                    send_email_with_retry(
+                        subject='You Have Been Matched — BloodConnect',
+                        message=plain_message,
+                        recipient_list=[donor.email],
+                        html_message=html_message,
+                    )
             return render(request, 'donors/results.html', {'matches': matches, 'request_obj': blood_request})
     else:
         form = BloodRequestForm()
