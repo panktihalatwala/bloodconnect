@@ -85,11 +85,31 @@
 </head>
 <body>
     <nav class="navbar navbar-dark mb-5 py-3">
-        <div class="container">
-            <a class="navbar-brand fs-4" href="/">🩸 Emergency Blood Donor Network</a>
-            <div>
-                <a class="btn btn-outline-light btn-sm me-2" href="{% url 'register_donor' %}">Register as Donor</a>
-                <a class="btn btn-outline-light btn-sm" href="{% url 'submit_request' %}">Request Blood</a>
+        <div class="container d-flex flex-wrap justify-content-between align-items-center">
+            <a class="navbar-brand fs-4" href="{% url 'home' %}">🩸 Emergency Blood Donor Network</a>
+            <div class="d-flex flex-wrap gap-2">
+                {% if user.is_authenticated %}
+                    {% if user.profile.is_donor %}
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'donor_dashboard' %}">My Donor Dashboard</a>
+                    {% endif %}
+                    {% if user.profile.is_requester %}
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'requester_dashboard' %}">My Requests</a>
+                    {% endif %}
+                    {% if user.profile.is_admin %}
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'verify_donors_list' %}">Verify Donors</a>
+                    {% endif %}
+                    {% if not user.profile.is_donor %}
+                        <a class="btn btn-outline-light btn-sm" href="{% url 'register_donor' %}">Register as Donor</a>
+                    {% endif %}
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'submit_request' %}">Request Blood</a>
+                    <form method="POST" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                    </form>
+                {% else %}
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'login' %}">Login</a>
+                    <a class="btn btn-outline-light btn-sm" href="{% url 'signup' %}">Sign Up</a>
+                {% endif %}
             </div>
         </div>
     </nav>
