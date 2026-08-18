@@ -131,3 +131,62 @@ class SignupToMatchIntegrationTest(TestCase):
 
         self.assertGreaterEqual(len(mail.outbox), 1)
         self.assertIn('Verified Donor', mail.outbox[-1].subject)
+
+    def test_donor_with_no_email_does_not_crash_verification(self):
+        """
+        Verifying a donor with a blank email should not crash the admin action.
+        The email attempt should fail gracefully and log the failure, not raise an exception.
+        """
+        admin_user = User.objects.create_user(username='test_admin_2', password='testpass123')
+        admin_user.profile.is_admin = True
+        admin_user.profile.save()
+
+        donor_no_email = Donor.objects.create(
+            name='No Email Donor',
+            email='',
+            blood_group='B+',
+            phone_number='7777777777',
+            location='Nadiad',
+            is_verified=False,
+        )
+
+        self.client.login(username='test_admin_2', password='testpass123')
+        response = self.client.get(f'/donors/verify/{donor_no_email.id}/')
+
+        donor_no_email.refresh_from_db()
+        self.assertTrue(donor_no_email.is_verified)
+        self.assertEqual(response.status_code, 302)
+
+    def test_duplicate_blood_request_does_not_duplicate_matchlog(self):
+        """
+        If the same requester submits two separate blood requests for the same
+        blood group and location, each request should get its own MatchLog entries
+        (not merged or blocked), and no duplicate MatchLog should exist for the
+        same donor+request pair even if matching logic runs twice.
+        """
+        self.client.login(username='test_requester', password='testpass123')
+
+        first_response = self.client.post('/donors/request/', {
+            'requester_name': 'Duplicate Test',
+            'requester_email': 'dup1@example.com',
+            'blood_group_needed': 'O+',
+            'urgency': 'High',
+            'hospital_location': 'Vadodara',
+        })
+        second_response = self.client.post('/donors/request/', {
+            'requester_name': 'Duplicate Test',
+            'requester_email': 'dup2@example.com',
+            'blood_group_needed': 'O+',
+            'urgency': 'High',
+            'hospital_location': 'Vadodara',
+        })
+
+        self.assertEqual(first_response.status_code, 200)
+        self.assertEqual(second_response.status_code, 200)
+
+        requests = BloodRequest.objects.filter(requester_name='Duplicate Test')
+        self.assertEqual(requests.count(), 2)
+
+        for req in requests:
+            match_count = MatchLog.objects.filter(donor=self.donor, blood_request=req).count()
+            self.assertEqual(match_count, 1)
