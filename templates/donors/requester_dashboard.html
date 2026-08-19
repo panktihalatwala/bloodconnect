@@ -4,6 +4,7 @@
 <h2 class="mb-4">My Blood Requests</h2>
 
 {% if my_requests %}
+    <div class="table-responsive">
     <table class="table">
         <thead>
             <tr>
@@ -34,6 +35,7 @@
             {% endfor %}
         </tbody>
     </table>
+    </div>
 {% else %}
     <p class="text-muted">You haven't submitted any blood requests yet.</p>
 {% endif %}

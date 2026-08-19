@@ -2,12 +2,22 @@
 {% block title %}Login{% endblock %}
 {% block content %}
 <h2 class="mb-4">Login</h2>
-<form method="POST" class="col-md-4">
+<form method="POST" class="col-md-4 needs-validation" novalidate>
     {% csrf_token %}
     {% for field in form %}
         <div class="mb-3">
             <label class="form-label">{{ field.label }}</label>
-            {{ field }}
+            {% if field.errors %}
+                {{ field }}
+                <div class="invalid-feedback d-block">
+                    {{ field.errors|striptags }}
+                </div>
+            {% else %}
+                {{ field }}
+                <div class="invalid-feedback">
+                    Please enter a valid {{ field.label|lower }}.
+                </div>
+            {% endif %}
         </div>
     {% endfor %}
     <button type="submit" class="btn btn-danger">Login</button>

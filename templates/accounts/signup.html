@@ -2,9 +2,24 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Create Account</h2>
-    <form method="post">
+    <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
+        {% for field in form %}
+            <div class="mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                {% if field.errors %}
+                    {{ field }}
+                    <div class="invalid-feedback d-block">
+                        {{ field.errors|striptags }}
+                    </div>
+                {% else %}
+                    {{ field }}
+                    <div class="invalid-feedback">
+                        Please provide a valid {{ field.label|lower }}.
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
         <button type="submit" class="btn btn-danger">Sign Up</button>
     </form>
     <p class="mt-3">Already have an account? <a href="{% url 'login' %}">Login here</a></p>
