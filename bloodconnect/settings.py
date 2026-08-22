@@ -73,19 +73,35 @@ WSGI_APPLICATION = 'bloodconnect.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+#
+# OFFLINE DEMO MODE: set USE_LOCAL_DB=True in .env to run against a local
+# SQLite database instead of the shared Neon PostgreSQL database. Use this
+# for offline live demos where internet access to Neon cannot be guaranteed.
+# Seed local test data with `python manage.py migrate` + manual test entries
+# before the demo, since this database is separate from the shared Neon data.
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
-        'OPTIONS': {'sslmode': 'require'},
-        'DISABLE_SERVER_SIDE_CURSORS': True,
+USE_LOCAL_DB = config('USE_LOCAL_DB', default=False, cast=bool)
+
+if USE_LOCAL_DB:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'demo_offline_db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT'),
+            'OPTIONS': {'sslmode': 'require'},
+            'DISABLE_SERVER_SIDE_CURSORS': True,
+        }
+    }
 
 
 # Password validation
@@ -128,13 +144,27 @@ LOGIN_REDIRECT_URL = '/donors/register/'
 LOGOUT_REDIRECT_URL = '/login/'
 LOGIN_URL = 'login'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# Email configuration
+#
+# OFFLINE DEMO MODE: set EMAIL_OFFLINE_MODE=True in .env to force the
+# console backend (prints emails to terminal) regardless of SMTP settings.
+# Use this for offline live demos where internet access to Gmail SMTP
+# cannot be guaranteed — the OTP/verification/match-notification flows
+# still work end-to-end and can be shown on screen via the terminal output.
+
+EMAIL_OFFLINE_MODE = config('EMAIL_OFFLINE_MODE', default=False, cast=bool)
+
+if EMAIL_OFFLINE_MODE:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'bloodconnect@example.com'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Logging configuration for email send attempts (success/failure tracking)
 LOGGING = {
