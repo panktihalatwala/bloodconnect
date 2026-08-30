@@ -210,6 +210,10 @@ def respond_to_match(request, match_id):
             match.status = response
             match.responded_at = timezone.now()
             match.save()
+            if response == 'Accepted':
+                blood_request = match.blood_request
+                blood_request.status = 'Fulfilled'
+                blood_request.save()
     return redirect('donor_dashboard')
 
 @role_required('requester')
