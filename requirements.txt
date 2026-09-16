@@ -4,3 +4,6 @@ psycopg2-binary==2.9.12
 python-decouple==3.8
 sqlparse==0.5.5
 tzdata==2026.3
+pandas==3.0.5
+scikit-learn==1.9.1
+joblib==1.6.0
