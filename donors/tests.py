@@ -190,3 +190,59 @@ class SignupToMatchIntegrationTest(TestCase):
         for req in requests:
             match_count = MatchLog.objects.filter(donor=self.donor, blood_request=req).count()
             self.assertEqual(match_count, 1)
+
+
+    def test_donor_with_donation_history_ranks_above_donor_with_none(self):
+        """
+        ML ranking integration (FR-14): a donor with a real, frequent
+        DonationHistory should rank above a donor with no history at all,
+        confirming the trained model is actually being applied to reorder
+        matched donors, not just returning them unchanged.
+        """
+        import datetime
+        from donors.models import DonationHistory
+
+        frequent_donor = Donor.objects.create(
+            name='Frequent Donor',
+            email='frequent@example.com',
+            blood_group='O+',
+            phone_number='9000000001',
+            location='Vadodara',
+            availability_status=True,
+            is_verified=True,
+        )
+        for i in range(8):
+            DonationHistory.objects.create(
+                donor=frequent_donor,
+                donation_date=datetime.date.today() - datetime.timedelta(days=30 * i),
+                is_confirmed=True,
+            )
+
+        no_history_donor = Donor.objects.create(
+            name='No History Donor',
+            email='nohistory@example.com',
+            blood_group='O+',
+            phone_number='9000000002',
+            location='Vadodara',
+            availability_status=True,
+            is_verified=True,
+        )
+
+        self.client.login(username='test_requester', password='testpass123')
+        response = self.client.post('/donors/request/', {
+            'requester_name': 'Ranking Test',
+            'requester_email': 'rankingtest@example.com',
+            'blood_group_needed': 'O+',
+            'urgency': 'High',
+            'hospital_location': 'Vadodara',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        returned_donors = response.context['matches']
+        self.assertGreaterEqual(len(returned_donors), 2)
+
+        names_in_order = [d.name for d in returned_donors]
+        self.assertLess(
+            names_in_order.index('Frequent Donor'),
+            names_in_order.index('No History Donor')
+        )
