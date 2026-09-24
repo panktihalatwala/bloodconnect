@@ -8,7 +8,12 @@
         <div class="col-md-4 mb-3">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Donor Match</h5>
+                    <h5 class="card-title">
+                        Donor Match
+                        {% if forloop.first %}
+                        <span class="badge bg-warning text-dark">Recommended</span>
+                        {% endif %}
+                    </h5>
                     <p class="card-text">
                         Blood Group: <span class="badge bg-danger">{{ donor.blood_group }}</span><br>
                         General Area: {{ donor.location }}<br>

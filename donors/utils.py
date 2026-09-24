@@ -41,4 +41,6 @@ def find_matching_donors_with_fallback(blood_group_needed, location=None):
     if not donors and location:
         # Nothing found nearby — fall back to searching without location restriction
         donors = find_matching_donors(blood_group_needed, location=None)
-    return donors
+
+    from .ml_ranking import rank_donors_by_response_likelihood
+    return rank_donors_by_response_likelihood(donors)
