@@ -52,13 +52,13 @@ _model_cache = None
 def _load_model():
     global _model_cache
     if _model_cache is None:
-        import joblib
+        import joblib # noqa
         _model_cache = joblib.load(MODEL_PATH)
     return _model_cache
 
 
 def _months_between(earlier_date, later_date):
-    from dateutil.relativedelta import relativedelta
+    from dateutil.relativedelta import relativedelta # noqa
     if earlier_date is None:
         return None
     delta = relativedelta(later_date, earlier_date)
@@ -117,7 +117,7 @@ def rank_donors_by_response_likelihood(donors):
 
     try:
         model = _load_model()
-        import pandas as pd
+        import pandas as pd # noqa
         feature_rows = [compute_donor_features(d) for d in donors]
         X = pd.DataFrame(feature_rows)[FEATURE_COLUMNS]
         probabilities = model.predict_proba(X)[:, 1]
