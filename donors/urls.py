@@ -11,6 +11,7 @@ urlpatterns = [
     path('verify-otp/<int:request_id>/', views.verify_otp, name='verify_otp'),
     path('dashboard/', views.donor_dashboard, name='donor_dashboard'),
     path('respond/<int:match_id>/', views.respond_to_match, name='respond_to_match'),
+    path('confirm-donation/<int:match_id>/', views.confirm_donation, name='confirm_donation'),
     path('my-requests/', views.requester_dashboard, name='requester_dashboard'),
     path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
 ]

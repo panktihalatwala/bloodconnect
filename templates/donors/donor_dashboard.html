@@ -60,6 +60,31 @@
     <p class="text-muted">No pending matches right now.</p>
 {% endif %}
 
+<h4 class="mt-4">Accepted — Awaiting Donation Confirmation</h4>
+{% if accepted_awaiting_confirmation %}
+    <div class="row">
+        {% for match in accepted_awaiting_confirmation %}
+        <div class="col-md-4 mb-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <h5 class="card-title">{{ match.blood_request.blood_group_needed }} — Accepted</h5>
+                    <p class="card-text">
+                        Hospital: {{ match.blood_request.hospital_location }}<br>
+                        Accepted: {{ match.responded_at|date:"d M Y, H:i" }}
+                    </p>
+                    <form method="POST" action="{% url 'confirm_donation' match.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-success">Confirm Donation Completed</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p class="text-muted">No accepted matches awaiting confirmation.</p>
+{% endif %}
+
 <h4 class="mt-4">Past Responses</h4>
 {% if past_matches %}
     <ul class="list-group">

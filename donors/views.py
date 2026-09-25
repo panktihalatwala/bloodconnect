@@ -193,11 +193,20 @@ def donor_dashboard(request):
     pending_matches = MatchLog.objects.filter(donor=donor, status='Pending').select_related('blood_request')
     past_matches = MatchLog.objects.filter(donor=donor).exclude(status='Pending').select_related('blood_request')
     donation_history = DonationHistory.objects.filter(donor=donor).order_by('-donation_date')
+
+    confirmed_request_ids = set(
+        DonationHistory.objects.filter(donor=donor).values_list('blood_request_id', flat=True)
+    )
+    accepted_awaiting_confirmation = MatchLog.objects.filter(
+        donor=donor, status='Accepted'
+    ).exclude(blood_request_id__in=confirmed_request_ids).select_related('blood_request')
+
     return render(request, 'donors/donor_dashboard.html', {
         'donor': donor,
         'pending_matches': pending_matches,
         'past_matches': past_matches,
         'donation_history': donation_history,
+        'accepted_awaiting_confirmation': accepted_awaiting_confirmation,
     })
 
 @role_required('donor')
@@ -214,6 +223,34 @@ def respond_to_match(request, match_id):
                 blood_request = match.blood_request
                 blood_request.status = 'Fulfilled'
                 blood_request.save()
+    return redirect('donor_dashboard')
+
+@role_required('donor')
+def confirm_donation(request, match_id):
+    """
+    Records a real DonationHistory entry once a donor confirms an Accepted
+    match actually resulted in a completed donation. This is kept as a
+    separate, explicit step from Accept (see comment in respond_to_match) —
+    accepting a match is a commitment, confirming donation is evidence the
+    commitment was fulfilled. Only confirmed donations should ever feed the
+    ML ranking model's real Recency/Frequency/Monetary/Time features.
+    get_or_create prevents duplicate DonationHistory rows if this view is
+    ever called twice for the same donor + blood_request (e.g. double-click).
+    """
+    donor = get_object_or_404(Donor, user=request.user)
+    match = get_object_or_404(MatchLog, id=match_id, donor=donor, status='Accepted')
+    if request.method == 'POST':
+        _, created = DonationHistory.objects.get_or_create(
+            donor=donor,
+            blood_request=match.blood_request,
+            defaults={'donation_date': timezone.now().date(), 'is_confirmed': True},
+        )
+        if created:
+            donor.last_donation_date = timezone.now().date()
+            donor.save()
+            messages.success(request, "Thank you! Your donation has been recorded.")
+        else:
+            messages.info(request, "This donation was already recorded.")
     return redirect('donor_dashboard')
 
 @role_required('requester')
