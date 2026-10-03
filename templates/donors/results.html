@@ -20,11 +20,17 @@
                         <span class="badge bg-success">Available</span>
                     </p>
                     {% if verified %}
-                    <p class="card-text">
-                        Name: {{ donor.name }}<br>
-                        Phone: {{ donor.phone_number }}<br>
-                        Email: {{ donor.email }}
-                    </p>
+                        {% if donor.consent_to_disclose %}
+                        <p class="card-text">
+                            Name: {{ donor.name }}<br>
+                            Phone: {{ donor.phone_number }}<br>
+                            Email: {{ donor.email }}
+                        </p>
+                        {% else %}
+                        <p class="card-text text-muted">
+                            This donor has chosen not to share contact details directly. Please contact BloodConnect support to coordinate.
+                        </p>
+                        {% endif %}
                     {% else %}
                     <a href="{% url 'send_otp' request_obj.id %}" class="btn btn-sm btn-outline-danger">Verify to see contact details</a>
                     {% endif %}

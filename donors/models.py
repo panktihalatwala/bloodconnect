@@ -18,6 +18,7 @@ class Donor(models.Model):
     availability_status = models.BooleanField(default=True)
     last_donation_date = models.DateField(null=True, blank=True)
     is_verified = models.BooleanField(default=False)
+    consent_to_disclose = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} ({self.blood_group})"

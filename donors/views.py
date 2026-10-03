@@ -245,3 +245,10 @@ def toggle_availability(request):
     donor.availability_status = not donor.availability_status
     donor.save()
     return redirect('donor_dashboard')
+
+@role_required('donor')
+def toggle_consent(request):
+    donor = get_object_or_404(Donor, user=request.user)
+    donor.consent_to_disclose = not donor.consent_to_disclose
+    donor.save()
+    return redirect('donor_dashboard')

@@ -22,12 +22,31 @@
                 <span class="badge bg-secondary">Unavailable</span>
             {% endif %}
         </p>
-        <form method="POST" action="{% url 'toggle_availability' %}">
+        <form method="POST" action="{% url 'toggle_availability' %}" class="mb-3">
             {% csrf_token %}
             {% if donor.availability_status %}
                 <button type="submit" class="btn btn-sm btn-outline-secondary">Mark as Unavailable</button>
             {% else %}
                 <button type="submit" class="btn btn-sm btn-outline-success">Mark as Available</button>
+            {% endif %}
+        </form>
+        <p class="card-text">
+            Contact Disclosure:
+            {% if donor.consent_to_disclose %}
+                <span class="badge bg-success">Allowed when matched</span>
+            {% else %}
+                <span class="badge bg-secondary">Withheld</span>
+            {% endif %}
+        </p>
+        <p class="text-muted" style="font-size: 0.85rem;">
+            Controls whether requesters can see your name, phone, and email after OTP verification, once you are matched to their request.
+        </p>
+        <form method="POST" action="{% url 'toggle_consent' %}">
+            {% csrf_token %}
+            {% if donor.consent_to_disclose %}
+                <button type="submit" class="btn btn-sm btn-outline-secondary">Withhold My Contact Details</button>
+            {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-success">Allow My Contact Details to Be Shown</button>
             {% endif %}
         </form>
     </div>
