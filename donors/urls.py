@@ -13,4 +13,5 @@ urlpatterns = [
     path('respond/<int:match_id>/', views.respond_to_match, name='respond_to_match'),
     path('my-requests/', views.requester_dashboard, name='requester_dashboard'),
     path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
+    path('toggle-consent/', views.toggle_consent, name='toggle_consent'),
 ]
