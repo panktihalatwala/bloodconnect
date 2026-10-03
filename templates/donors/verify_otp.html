@@ -2,6 +2,11 @@
 {% block title %}Verify OTP{% endblock %}
 {% block content %}
 <h2 class="mb-4">Enter OTP</h2>
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
 <p>We sent a 6-digit code to {{ request_obj.requester_email }}</p>
 {% if error %}
 <div class="alert alert-danger">{{ error }}</div>

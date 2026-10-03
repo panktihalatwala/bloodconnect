@@ -7,6 +7,7 @@ from accounts.decorators import role_required
 from .models import Donor, BloodRequest, OTPVerification, MatchLog, DonationHistory
 from .email_utils import send_email_with_retry
 from django.utils import timezone
+from django.conf import settings
 import random
 
 
@@ -164,12 +165,27 @@ def send_otp(request, request_id):
     </div>
     """
 
-    send_email_with_retry(
+    email_sent = send_email_with_retry(
         subject='Your BloodConnect OTP Code',
         message=plain_message,
         recipient_list=[blood_request.requester_email],
         html_message=html_message,
     )
+
+    email = blood_request.requester_email or ''
+    if '@' in email:
+        local_part, domain = email.split('@', 1)
+        masked_email = f"{local_part[:1]}***@{domain}"
+    else:
+        masked_email = "your email"
+
+    if settings.EMAIL_OFFLINE_MODE:
+        messages.info(request, "Offline demo mode: the OTP was printed to the server terminal, not emailed.")
+    elif email_sent:
+        messages.success(request, f"OTP sent to {masked_email}.")
+    else:
+        messages.warning(request, "We could not send the OTP email. Please go back and check the email address you entered.")
+
     return redirect('verify_otp', request_id=request_id)
 
 def verify_otp(request, request_id):
