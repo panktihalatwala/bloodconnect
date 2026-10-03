@@ -106,6 +106,48 @@ class SignupToMatchIntegrationTest(TestCase):
         match_log.refresh_from_db()
         self.assertEqual(match_log.status, 'Accepted')
         self.assertIsNotNone(match_log.responded_at)
+            
+    def test_confirm_donation_creates_history_and_updates_last_donation_date(self):
+        """
+        Confirming a donation on an Accepted match should create exactly one
+        DonationHistory record and update the donor's last_donation_date.
+        Calling confirm twice for the same match should not create a duplicate
+        DonationHistory row (get_or_create guard).
+        """
+        from donors.models import DonationHistory
+        import datetime
+
+        blood_request = BloodRequest.objects.create(
+            requester_name='Confirm Test',
+            requester_email='confirmtest@example.com',
+            blood_group_needed='O+',
+            urgency='High',
+            hospital_location='Vadodara',
+        )
+        match_log = MatchLog.objects.create(
+            donor=self.donor,
+            blood_request=blood_request,
+            status='Accepted',
+        )
+
+        self.client.login(username='test_donor', password='testpass123')
+        response = self.client.post(f'/donors/confirm-donation/{match_log.id}/')
+        self.assertEqual(response.status_code, 302)
+
+        self.donor.refresh_from_db()
+        self.assertEqual(self.donor.last_donation_date, datetime.date.today())
+
+        donation_count = DonationHistory.objects.filter(
+            donor=self.donor, blood_request=blood_request
+        ).count()
+        self.assertEqual(donation_count, 1)
+
+        # Call it a second time — should not create a duplicate record
+        self.client.post(f'/donors/confirm-donation/{match_log.id}/')
+        donation_count_after_second_call = DonationHistory.objects.filter(
+            donor=self.donor, blood_request=blood_request
+        ).count()
+        self.assertEqual(donation_count_after_second_call, 1)
 
     def test_admin_verify_donor_sends_email(self):
         """Verifying a donor should mark is_verified True and send a notification email."""
