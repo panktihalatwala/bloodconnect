@@ -14,4 +14,5 @@ urlpatterns = [
     path('my-requests/', views.requester_dashboard, name='requester_dashboard'),
     path('toggle-availability/', views.toggle_availability, name='toggle_availability'),
     path('toggle-consent/', views.toggle_consent, name='toggle_consent'),
+    path('confirm-donation/<int:match_id>/', views.confirm_donation, name='confirm_donation'),
 ]
