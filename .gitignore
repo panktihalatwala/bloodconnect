@@ -4,5 +4,4 @@ __pycache__/
 db.sqlite3
 .env
 *.log
-.env
 demo_offline_db.sqlite3
